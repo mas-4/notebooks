@@ -61,11 +61,11 @@ def fits(word, good, known, mask):
 
 
 def guess(words_df, guessed, good, known, mask, dumb_player=False):
-    key = f'{word}_fits'
+    key = f'fits'
     words_df[key] = words_df['word'].apply(lambda w: fits(w, good, known, mask))
     guesses = words_df[words_df[key] == True]
     if 'frequency' not in guesses.columns:
-        guesses = guesses.merge(freq_df, on='word', how='left')
+        guesses = guesses.merge(freq_df, on='word', how='left').fillna(value=freq_df.frequency.mean())
     if dumb_player:
         return guesses, guesses[(guesses['frequency'] == guesses['frequency'].max()) & (~guesses.word.isin(guessed))].word.iloc[0]
     else:
@@ -80,7 +80,7 @@ def guess(words_df, guessed, good, known, mask, dumb_player=False):
 def solve(word, answer, dumb_player=False):
     if len(word) != 5:
         return 1000
-    guessed = []
+    guessed = [word]
     good, known, mask = evaluate(word, answer, letters.copy(), [])
     kw = words_df.copy()
 
@@ -94,15 +94,16 @@ def solve(word, answer, dumb_player=False):
         if g in guessed:
             raise Exception('Duplicate word found, on {}, {}, {}'.format(word, answer, dumb_player))
         guessed.append(g)
-        good, known, mask = evaluate(guessed[-1], answer, good, known)
+        i += 1
         if guessed[-1] == answer:
             return len(guessed)
-        i += 1
+        good, known, mask = evaluate(guessed[-1], answer, good, known)
         if i >= 5:
             return 5
 
 
 if __name__ == '__main__':
     t = time.time()
+    solve('reate', 'wooer', True)
     print(np.mean([solve('rubin', w, True) for w in answers]))
     print(time.time() - t)
