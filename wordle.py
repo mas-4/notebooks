@@ -20,8 +20,6 @@ for word in answers:
     for letter in word:
         letter_freq[letter] += 1
 
-w_cache = {}
-
 # good = letters left in the alphabet
 # known = letters in the answer
 # mask = 'aba__' for 'abase' =='abaft'
@@ -82,8 +80,6 @@ def guess(words_df, guessed, good, known, mask, dumb_player=False):
 def solve(word, answer, dumb_player=False):
     if len(word) != 5:
         return 1000
-    if word in w_cache:
-        return w_cache[word]
     guessed = []
     good, known, mask = evaluate(word, answer, letters.copy(), [])
     kw = words_df.copy()
